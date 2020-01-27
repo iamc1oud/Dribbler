@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "859192587542",
+    "firebase_url": "https://clouddice-995ef.firebaseio.com",
+    "project_id": "clouddice-995ef",
+    "storage_bucket": "clouddice-995ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859192587542:android:b341f1c9ad9996eee30c37",
+        "android_client_info": {
+          "package_name": "com.example.dribbler_v2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "859192587542-7rnlau6tl4q3i1hahkh7jn28eiftromd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp-8P3MNmJM76bC9Oyr1UrDFJ01enELIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "859192587542-rqehk88b9in7cmkntffa7m53gp3gcip3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
