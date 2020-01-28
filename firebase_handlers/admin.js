@@ -39,24 +39,22 @@ const dropboxUploadStream = dropbox({
     resource: 'files/upload',
     parameters: {
         // Required filename
-        path: '/package-lock.json'
+        path: '/2YmpRxA.png'
     },
-    readStream: fs.createReadStream('./package-lock.json')
+    readStream: fs.createReadStream('./2YmpRxA.png')
 }, (err, result, response) => {
     console.log(result)
     dbx.sharingCreateSharedLink({
         path: result.path_lower
     }).then((result) => {
         console.log(result);
-        let docRef = db.collection('files').doc('subject_1')
 
-        let addDoc = db.collection('files').doc('Soft Computing').collection('module-2').add({
+        let addDoc = db.collection('upload').add({
+            title: "Some title",
             url: result.url.split('?')[0],
-            data: {
-                title: 'LAN/WAN/MAN',
-                module: 2
-            },
-            date_uploaded: FieldValue.serverTimestamp(),
+            module : "2", // Pass a string
+            subject: 'Operation Research',
+            uploaded_on: FieldValue.serverTimestamp(),
         }).then((val) => console.log('Complete')).catch((err) => console.log(err));
 
     }).catch((err) => {

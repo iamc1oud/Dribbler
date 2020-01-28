@@ -1,6 +1,7 @@
-import 'package:dribbler_v2/screen/SubjectGrid.dart';
+import 'package:dribbler_v2/screen/study_material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'JustUploaded.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -10,46 +11,192 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Dribbler"),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[Color(0xFF1F204E), Color(0xFF114174),])),
+    return SafeArea(
+      child: Scaffold(
+        body: StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance.collection('subject').getDocuments().asStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return new Text('Loading...');
+              default:
+                return Stack(
+                  children: <Widget>[
+                    new Container(
+                      height: MediaQuery.of(context).size.height,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [Color(0xFF2a1a4c), Color(0xFF3e5588)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight)),
+                    ),
+                    Positioned(
+                      top: 10,
+                      left: 20,
+                      right: 10,
+                      bottom: 10,
+                      child: new Text(
+                        "Dribbler",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 50,
+                          fontFamily: "Quicksand",
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 100,
+                      right: 10,
+                      left: 10,
+                      bottom: 10,
+                      child: Container(
+                        child: new GridView.count(
+                          crossAxisCount: 2,
+                          scrollDirection: Axis.vertical,
+                          childAspectRatio: 1,
+                          physics: BouncingScrollPhysics(),
+                          children: snapshot.data.documents.map((DocumentSnapshot document) {
+                            return InkWell(
+                              onTap: () {
+                                showBottomSheet(
+                                    clipBehavior: Clip.antiAlias,
+                                    backgroundColor: Colors.transparent,
+                                    context: context,
+                                    builder: (BuildContext ctx) => Scaffold(
+                                          backgroundColor: Colors.transparent,
+                                          body: ClipRRect(
+                                            //borderRadius: BorderRadius.only(
+                                            //  topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                                            child: new Container(
+                                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.6)),
+                                              ////borderRadius: BorderRadius.only(
+                                              //topLeft: Radius.circular(30), topRight: Radius.circular(30))),
+                                              height: MediaQuery.of(context).size.height,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(top: 30.0, bottom: 30.0),
+                                                child: Center(
+                                                  child: ModulePicker(
+                                                    array: document.data["module"],
+                                                    subjectName: document.data["name"],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 10),
+                                child: SizedBox(
+                                  height: 70,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxHeight: 70,
+                                      minHeight: 60,
+                                    ),
+                                    child: new Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.white.withOpacity(0.5)),
+                                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                                      child: Stack(children: [
+                                        Positioned(
+                                          top: 40,
+                                          left: 10,
+                                          right: 10,
+                                          child: new Text(
+                                            document.data["name"],
+                                            //textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          left: 10,
+                                          right: 10,
+                                          bottom: 40,
+                                          child: new Text(
+                                            document.data["module"].length.toString() + " Modules",
+                                            //textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white.withOpacity(0.4),
+                                                fontSize: 15,
+                                                fontFamily: "Quicksand"),
+                                          ),
+                                        )
+                                      ]),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+            }
+          },
         ),
       ),
-      drawer: new SizedBox(
-        width: MediaQuery.of(context).size.width * 0.4,
-        child: new Drawer(
-          child: new ListView(physics: BouncingScrollPhysics(), children: [
-            SizedBox(
-              height: 30,
-              child: new CircleAvatar(
-                child: new Icon(Icons.ac_unit),
-              ),
-            ),
-          ]),
-        ),
-      ),
-      bottomSheet: new BottomSheet(
-        onClosing: () {},
-        elevation: 10,
-        builder: (context) {
-          return Container(
-            height: 50,
-            decoration: BoxDecoration(color: Colors.white),
-            width: MediaQuery.of(context).size.width,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[new Icon(Icons.home), new Icon(Icons.favorite_border)],
-            ),
-          );
-        },
-      ),
+    );
+  }
+}
+
+class ModulePicker extends StatefulWidget {
+  List<dynamic> list;
+  String subjectName;
+  ModulePicker({List<dynamic> array, String subjectName}) {
+    this.list = array;
+    this.subjectName = subjectName;
+  }
+
+  @override
+  _ModulePickerState createState() => _ModulePickerState();
+}
+
+class _ModulePickerState extends State<ModulePicker> {
+  @override
+  Widget build(BuildContext context) {
+    print(widget.list);
+    return ListView(
+      addRepaintBoundaries: true,
+      physics: BouncingScrollPhysics(),
+      children: widget.list
+          .map((f) => Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            maintainState: true,
+                            builder: (context) => StudyMaterial(
+                                  module: f,
+                                  subjectName: widget.subjectName,
+                                )));
+                  },
+                  child: SizedBox(
+                    height: 100,
+                    child: Container(
+                      padding: EdgeInsets.all(2.0),
+                      child: Card(
+                        elevation: 5.0,
+                        color: Colors.black.withOpacity(0.9),
+                        child: Center(
+                            child: new Text(
+                          "Module ${f}",
+                          style: TextStyle(color: Colors.white, fontSize: 15),
+                        )),
+                      ),
+                    ),
+                  ),
+                ),
+              ))
+          .toList(),
     );
   }
 }
