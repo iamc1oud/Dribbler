@@ -1,5 +1,8 @@
+import 'package:dribbler_v2/cacheManager/cache.dart';
+import 'package:dribbler_v2/fragment/noteFragment.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mmkv_flutter/mmkv_flutter.dart';
 
 class StudyMaterial extends StatefulWidget {
   String module;
@@ -53,29 +56,18 @@ class _StudyMaterialState extends State<StudyMaterial> {
                   if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return new Text('Loading...');
+                      return Text("Loading...");
                     default:
                       return Container(
-                        height: 800,
+                        height: MediaQuery.of(context).size.height * 0.8,
                         child: new ListView(
-                          physics: BouncingScrollPhysics(),
+                          physics: PageScrollPhysics(),
                           children: snapshot.data.documents
                               .map((e) => Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(30),
-                                            border: Border.all(color: Colors.white)),
-                                        child: Row(
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: new Text(e.data['title'].toString(),
-                                                  style: TextStyle(color: Colors.white, fontSize: 20)),
-                                            ),
-                                          ],
-                                        )),
+                                    child: NoteFragment(
+                                      ds: e,
+                                    ),
                                   ))
                               .toList(),
                         ),
